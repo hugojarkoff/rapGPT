@@ -9,6 +9,8 @@ dependencies = [
     "tiktoken>=0.6.0",
     "ruff>=0.3.0",
     "torch>=2.2.2",
+    "pydantic>=2.7.1",
+    "pydantic-settings[toml]>=2.2.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

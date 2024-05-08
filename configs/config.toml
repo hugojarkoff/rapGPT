@@ -1,0 +1,4 @@
+revision = "main"
+
+[data]
+path = "data/french_rap_lyrics"
