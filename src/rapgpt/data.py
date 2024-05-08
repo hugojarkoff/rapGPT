@@ -9,6 +9,8 @@ class Corpus:
         assert self.data_path.exists()
         self.artists: list[Path] = list(self.data_path.glob("*.txt"))
 
+    def __len__(self) -> int:
+        return len(self.artists)
 
 class ArtistLyrics:
     @classmethod
@@ -26,6 +28,7 @@ if __name__ == "__main__":
     # TODO: Put in unit test
     settings = Settings()
     corpus = Corpus(settings)
+    print("Nb of artists in the corpus: ", len(corpus))
     artist = Artist(corpus.artists[0])
-    print("artist name: ", artist.name)
-    print("artist lyrics: ", artist.lyrics[:100])
+    print("First artist name: ", artist.name)
+    print("First artist lyrics: ", artist.lyrics[:100])
