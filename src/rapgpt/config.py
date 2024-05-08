@@ -8,13 +8,25 @@ from pydantic_settings import (
 )
 
 
-class DataSettings(BaseModel):
+class DataConfig(BaseModel):
     path: str
 
 
-class Settings(BaseSettings):
+class DatasetConfig(BaseModel):
+    max_length: int
+    encoding: str
+
+
+class DataloaderConfig(BaseModel):
+    shuffle: bool
+    batch_size: int
+
+
+class Config(BaseSettings):
     revision: str
-    data: DataSettings
+    data: DataConfig
+    dataset: DatasetConfig
+    dataloader: DataloaderConfig
 
     model_config = SettingsConfigDict(toml_file="configs/config.toml")
 
@@ -31,7 +43,7 @@ class Settings(BaseSettings):
 
 
 def unit_test():
-    settings = Settings()
+    settings = Config()
     print(settings)
 
 
