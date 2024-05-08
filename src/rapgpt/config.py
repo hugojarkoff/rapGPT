@@ -15,6 +15,7 @@ class DataConfig(BaseModel):
 class DatasetConfig(BaseModel):
     max_length: int
     encoding: str
+    padding_token: str
 
 
 class DataloaderConfig(BaseModel):
