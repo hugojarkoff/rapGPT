@@ -1,4 +1,4 @@
-from rapgpt.config import Settings
+from rapgpt.config import Config
 from pathlib import Path
 
 
@@ -15,10 +15,10 @@ class Artist:
 
 
 class Corpus:
-    def __init__(self, settings: Settings) -> None:
-        self.data_path: Path = Path(settings.data.path)
+    def __init__(self, config: Config) -> None:
+        self.data_path: Path = Path(config.data.path)
 
-        # TODO: Move these assertions to Settings init?
+        # TODO: Move these assertions to Config init?
         assert self.data_path.exists()
         assert self.data_path.glob("*.txt")
 
@@ -31,8 +31,8 @@ class Corpus:
 
 if __name__ == "__main__":
     # TODO: Put in unit test
-    settings = Settings()
-    corpus = Corpus(settings)
+    config = Config()
+    corpus = Corpus(config)
     print("Nb of artists in the corpus: ", len(corpus))
     artist = corpus.artists[0]
     print("First artist name: ", artist.name)
