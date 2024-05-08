@@ -10,7 +10,7 @@ from pydantic_settings import (
 
 class DataSettings(BaseModel):
     path: str
-    
+
 
 class Settings(BaseSettings):
     revision: str
@@ -34,6 +34,7 @@ def unit_test():
     settings = Settings()
     print(settings)
 
-if __name__ == "__main__": 
+
+if __name__ == "__main__":
     # TODO: Move/refactor later
     unit_test()
