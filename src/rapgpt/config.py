@@ -9,25 +9,25 @@ from pydantic_settings import (
 
 
 class DataConfig(BaseModel):
-    path: str
+    path: str = "data/french_rap_lyrics"
 
 
 class DatasetConfig(BaseModel):
-    max_length: int
-    encoding: str
-    padding_token: str
+    max_length: int = 512
+    encoding: str = "r50k_base"
+    padding_token: str = "<PAD>"
 
 
 class DataloaderConfig(BaseModel):
-    shuffle: bool
-    batch_size: int
+    shuffle: bool = True
+    batch_size: int = 2
 
 
 class Config(BaseSettings):
-    revision: str
-    data: DataConfig
-    dataset: DatasetConfig
-    dataloader: DataloaderConfig
+    revision: str = "main"
+    data: DataConfig = DataConfig()
+    dataset: DatasetConfig = DatasetConfig()
+    dataloader: DataloaderConfig = DataloaderConfig()
 
     model_config = SettingsConfigDict(toml_file="configs/config.toml")
 
