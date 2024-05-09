@@ -35,7 +35,9 @@ class RapperDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, index: int) -> tuple[list[int], list[int], list[int]]:
+    def __getitem__(
+        self, index: int
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Generate a sequence of tokens starting at the given index
         sequence = self.data[index : index + self.max_length]
         targets = sequence[1:]  # The target is the next token in the sequence
