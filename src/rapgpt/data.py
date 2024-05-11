@@ -15,8 +15,8 @@ class Artist:
 
 
 class Corpus:
-    def __init__(self, config: Config) -> None:
-        self.data_path: Path = Path(config.data.path)
+    def __init__(self, data_path: str | Path) -> None:
+        self.data_path: Path = Path(data_path)
 
         # TODO: Move these assertions to Config init?
         assert self.data_path.exists()
@@ -32,7 +32,7 @@ class Corpus:
 if __name__ == "__main__":
     # TODO: Put in unit test
     config = Config()
-    corpus = Corpus(config)
+    corpus = Corpus(data_path=config.data.path)
     print("Nb of artists in the corpus: ", len(corpus))
     artist = corpus.artists[0]
     print("First artist name: ", artist.name)

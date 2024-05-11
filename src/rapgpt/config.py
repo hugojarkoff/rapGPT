@@ -12,7 +12,7 @@ class DataConfig(BaseModel):
     path: str = "data/french_rap_lyrics"
 
 
-class DatasetConfig(BaseModel):
+class DatasetEncodingConfig(BaseModel):
     max_length: int = 512
     encoding: str = "r50k_base"
     padding_token: str = "<PAD>"
@@ -26,7 +26,7 @@ class DataloaderConfig(BaseModel):
 class Config(BaseSettings):
     revision: str = "main"
     data: DataConfig = DataConfig()
-    dataset: DatasetConfig = DatasetConfig()
+    dataset_encoding: DatasetEncodingConfig = DatasetEncodingConfig()
     dataloader: DataloaderConfig = DataloaderConfig()
 
     model_config = SettingsConfigDict(toml_file="configs/config.toml")
