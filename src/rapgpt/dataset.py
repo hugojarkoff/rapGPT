@@ -1,37 +1,15 @@
-import tiktoken
 import torch
 from torch.utils.data import Dataset, DataLoader
-from rapgpt.config import Config, DatasetEncodingConfig
+from rapgpt.config import Config
 from rapgpt.data import Corpus, Artist
-
-
-class Encoder:
-    def __init__(self, dataset_encoding_config: DatasetEncodingConfig) -> None:
-        self.encoding = tiktoken.get_encoding(dataset_encoding_config.encoding)
-        self.max_length = dataset_encoding_config.max_length
-        self.padding_token = dataset_encoding_config.padding_token
-
-    def encode_data(self, data: str) -> list[int]:
-        return self.encoding.encode(data)
-
-    def add_padding(self, sequence: list[int]) -> list[int]:
-        if (
-            len(sequence) < self.max_length
-        ):  # Only pad if the sequence is shorter than the maximum length
-            pad_length = self.max_length - len(sequence)
-            padding = [self.encoding.encode(self.padding_token)[0]] * pad_length
-            return sequence + padding
-        else:
-            return sequence
+from rapgpt.encoder import Encoder
 
 
 class ArtistDataset(Dataset):
     def __init__(self, artist: Artist, encoder: Encoder) -> None:
         self.encoder = encoder
-        self.artist = (
-            artist  # TODO: Find a way to encode the artist name as token into self.data
-        )
-        self.data = self.encoder.encode_data(self.artist.lyrics)
+        self.artist = artist
+        self.data: list[int] = self.encoder.encode_data(self.artist.lyrics)
 
     def __len__(self) -> int:
         return len(self.data)
