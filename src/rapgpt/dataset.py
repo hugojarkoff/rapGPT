@@ -18,7 +18,7 @@ class ArtistDataset(Dataset):
         self, index: int
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Generate a sequence of tokens starting at the given index
-        sequence = self.data[index : index + encoder.max_length]
+        sequence = self.data[index : index + self.encoder.max_length]
         targets = sequence[1:]  # The target is the next token in the sequence
         inputs = sequence[:-1]  # The input is the current token in the sequence
 
