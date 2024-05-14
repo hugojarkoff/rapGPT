@@ -11,6 +11,9 @@ class Encoder:
     def encode_data(self, data: str) -> list[int]:
         return self.encoding.encode(data)
 
+    def decode_data(self, data: list[int]) -> str:
+        return self.encoding.decode(data)
+
     def add_padding(self, sequence: list[int]) -> list[int]:
         if (
             len(sequence) < self.max_length
@@ -20,3 +23,7 @@ class Encoder:
             return sequence + padding
         else:
             return sequence
+
+    @property
+    def vocab_size(self) -> int:
+        return self.encoding.max_token_value + 1

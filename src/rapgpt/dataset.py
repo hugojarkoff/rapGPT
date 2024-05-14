@@ -36,10 +36,6 @@ class ArtistDataset(Dataset):
 
         return inputs, targets, mask
 
-    @property
-    def vocab_size(self) -> int:
-        return self.encoder.encoding.max_token_value + 1
-
 
 if __name__ == "__main__":
     # Example usage:
