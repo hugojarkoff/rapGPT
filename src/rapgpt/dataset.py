@@ -1,7 +1,6 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from rapgpt.config import Config
-from rapgpt.data import Corpus, Artist
+from torch.utils.data import Dataset
+from rapgpt.data import Artist
 from rapgpt.encoder import Encoder
 
 
@@ -29,29 +28,3 @@ class ArtistDataset(Dataset):
         targets = torch.tensor(targets)
 
         return inputs, targets
-
-
-if __name__ == "__main__":
-    # Example usage:
-    config = Config()
-    encoder = Encoder(dataset_encoding_config=config.dataset_encoding)
-    corpus = Corpus(data_path=config.data.path)
-    artist = corpus.artists[0]
-    dataset = ArtistDataset(
-        artist=artist,
-        encoder=encoder,
-    )
-    dataloader = DataLoader(
-        dataset,
-        batch_size=config.dataloader.batch_size,
-        shuffle=config.dataloader.shuffle,
-    )
-
-    for batch in dataloader:
-        inputs, targets = batch
-        # Now you can use inputs, targets, and mask in your training loop
-        break
-
-    print(inputs)
-    print(targets)
-    print(dataset.encoder.encoding.encode("<PAD>"))

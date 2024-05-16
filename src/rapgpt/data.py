@@ -1,4 +1,3 @@
-from rapgpt.config import Config
 from pathlib import Path
 
 
@@ -27,13 +26,3 @@ class Corpus:
 
     def __len__(self) -> int:
         return len(self.artists)
-
-
-if __name__ == "__main__":
-    # TODO: Put in unit test
-    config = Config()
-    corpus = Corpus(data_path=config.data.path)
-    print("Nb of artists in the corpus: ", len(corpus))
-    artist = corpus.artists[0]
-    print("First artist name: ", artist.name)
-    print("First artist lyrics: ", artist.lyrics[:100])
