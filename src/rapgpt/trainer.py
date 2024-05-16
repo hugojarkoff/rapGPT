@@ -8,11 +8,20 @@ from rapgpt.config import Config
 from rapgpt.dataset import Encoder
 from rapgpt.data import Corpus
 from loguru import logger
+import wandb
+
+loggable = str | int | float
 
 
 class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
+        wandb.init(
+            project=config.wandb.project,
+            mode=config.wandb.mode,
+            tags=config.wandb.tags,
+            group=config.wandb.group,
+        )
 
         # General config
         self.encoder = Encoder(dataset_encoding_config=config.dataset_encoding)
@@ -43,6 +52,15 @@ class Trainer:
         self.loss_fn = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.training.lr)
 
+    def log(self, message: str | dict[str, loggable]) -> None:
+        if isinstance(message, str):
+            logger.info(message)
+            return
+        assert isinstance(message, dict)
+        for k, v in message.items():
+            logger.info(f"{k}:{v}")
+        wandb.log(message)
+
     @torch.no_grad()
     def generate(
         self, sample_text: str = "Les vrais savent", new_tokens: int = 30
@@ -64,18 +82,16 @@ class Trainer:
     def train(
         self,
     ) -> None:
-        logger.info("Training model")
+        self.log("Training model")
         generated_lyrics = self.generate(
             sample_text=self.config.evaluation.sample_text,
             new_tokens=self.config.evaluation.new_tokens,
         )
-        logger.info(f"Initial generated lyrics: {generated_lyrics}")
+        self.log({"Eval lyrics": generated_lyrics})
 
         # Training loop
-        num_epochs = self.config.training.num_epochs
-        for epoch in range(num_epochs):
+        for _ in range(self.config.training.num_epochs):
             self.model.train()
-            epoch_loss = 0
 
             for inputs, targets in self.dataloader:
                 inputs, targets = (
@@ -92,20 +108,16 @@ class Trainer:
                 targets_flat = targets.reshape(-1)  # Flatten targets
                 loss = self.loss_fn(output_flat, targets_flat)  # Compute loss
 
-                logger.info(f"Batch loss: {loss}")
-                epoch_loss += loss
+                self.log({"Batch loss": loss})
 
                 # Backward pass and optimization
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
 
-            # Print the average loss for the epoch
-            logger.info(
-                f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss / len(self.dataloader)}"
-            )
+            # Evaluation loop at the end of epoch
             generated_lyrics = self.generate(
                 sample_text=self.config.evaluation.sample_text,
                 new_tokens=self.config.evaluation.new_tokens,
             )
-            logger.info(f"Generated lyrics: {generated_lyrics}")
+            self.log({"Eval lyrics": generated_lyrics})

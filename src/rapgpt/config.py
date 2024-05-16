@@ -36,6 +36,13 @@ class EvalConfig(BaseModel):
     new_tokens: int = 30
 
 
+class WandbConfig(BaseModel):
+    project: str = "rapGPT"
+    mode: str = "online"  # offline or online or disabled
+    group: str = "dev"
+    tags: list[str] = ["dev", "debug"]
+
+
 T = TypeVar("T", bound="Config")
 
 
@@ -47,6 +54,7 @@ class Config(BaseModel):
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
     evaluation: EvalConfig = EvalConfig()
+    wandb: WandbConfig = WandbConfig()
 
     model_config = ConfigDict(extra="forbid")
 
