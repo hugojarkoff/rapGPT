@@ -35,12 +35,9 @@ class Trainer:
             torch.device("cuda:1") if torch.cuda.is_available() else torch.device("cpu")
         )
         vocab_size = self.encoder.vocab_size
-        self.model = TransformerModel(
-            input_dim=vocab_size,
-            num_heads=self.config.model.num_heads,
-            hidden_dim=self.config.model.hidden_dim,
-            num_layers=self.config.model.num_layers,
-        ).to(self.device)
+        self.model = TransformerModel(vocab_size=vocab_size, config=config).to(
+            self.device
+        )
 
         ## Loss Function and Optimizer
         self.criterion = nn.CrossEntropyLoss()
@@ -48,7 +45,7 @@ class Trainer:
 
     @torch.no_grad()
     def generate(
-        self, max_length: int = 100, sample_text: str = "Les vrais savent"
+        self, sample_text: str = "Les vrais savent", new_tokens: int = 30
     ) -> str:
         self.model.eval()
 
@@ -56,57 +53,57 @@ class Trainer:
         sample_input = self.encoder.encode_data(sample_text)
         sample_input = torch.tensor(sample_input).unsqueeze(0).to(self.device)
 
-        # Generate new tokens
-        for _ in range(max_length):
-            mask = torch.ones_like(sample_input)
-            output = self.model(sample_input, mask=mask)
-
-            # Sample the next token
-            output = output[0, -1, :]  # Take the last token
-            output = torch.softmax(output, dim=-1)  # Apply softmax
-            next_token = torch.multinomial(output, 1)  # Sample from the distribution
-
-            # Append the next token to the seed
-            sample_input = torch.cat([sample_input, next_token.unsqueeze(0)], dim=1)
+        output = self.model.generate(
+            sample_input,
+            new_tokens,
+        )
 
         # Decode the generated tokens
-        return self.encoder.decode_data(sample_input[0].tolist())
+        return self.encoder.decode_data(output[0].tolist())
 
     def train(
         self,
     ) -> None:
         logger.info("Training model")
-        logger.info("Generating lyrics: ", self.generate())
+        generated_lyrics = self.generate()
+        logger.info(f"Initial generated lyrics: {generated_lyrics}")
 
         # Training loop
         num_epochs = self.config.training.num_epochs
         for epoch in range(num_epochs):
             self.model.train()
-            total_loss = 0
+            epoch_loss = 0
 
-            for inputs, targets, mask in self.dataloader:
-                inputs, targets, mask = (
+
+            breaker = 0
+            for inputs, targets in self.dataloader:
+                inputs, targets = (
                     inputs.long().to(self.device),
                     targets.long().to(self.device),
-                    mask.long().to(self.device),
                 )
 
                 # Forward pass
                 self.optimizer.zero_grad()
-                output = self.model(inputs, mask=mask)
+                output = self.model(inputs)
 
                 # Loss computation
                 output_flat = output.reshape(-1, output.shape[2])  # Flatten output
                 targets_flat = targets.reshape(-1)  # Flatten targets
                 loss = self.criterion(output_flat, targets_flat)  # Compute loss
-                total_loss += loss
+                logger.info(f"Loss: {loss}")
+                epoch_loss += loss
 
                 # Backward pass and optimization
                 loss.backward()
                 self.optimizer.step()
+                self.optimizer.zero_grad()
+
+                breaker+=1
+                if breaker==20:
+                    break
 
             # Print the average loss for the epoch
             logger.info(
-                f"Epoch {epoch + 1}/{num_epochs}, Loss: {total_loss / len(self.dataloader)}"
+                f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss / len(self.dataloader)}"
             )
             logger.info(self.generate())

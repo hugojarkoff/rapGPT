@@ -16,9 +16,10 @@ class ArtistDataset(Dataset):
 
     def __getitem__(
         self, index: int
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        
         # Generate a sequence of tokens starting at the given index
-        sequence = self.data[index : index + self.encoder.max_length]
+        sequence = self.data[index : index + self.encoder.context_length]
         targets = sequence[1:]  # The target is the next token in the sequence
         inputs = sequence[:-1]  # The input is the current token in the sequence
 
@@ -26,15 +27,11 @@ class ArtistDataset(Dataset):
         inputs = self.encoder.add_padding(inputs)
         targets = self.encoder.add_padding(targets)
 
-        # Create a mask
-        mask = [1] * len(inputs)
-
         # Convert everything to PyTorch tensors
         inputs = torch.tensor(inputs)
         targets = torch.tensor(targets)
-        mask = torch.tensor(mask)
 
-        return inputs, targets, mask
+        return inputs, targets
 
 
 if __name__ == "__main__":
@@ -54,7 +51,7 @@ if __name__ == "__main__":
     )
 
     for batch in dataloader:
-        inputs, targets, mask = batch
+        inputs, targets = batch
         # Now you can use inputs, targets, and mask in your training loop
         break
 

@@ -13,7 +13,7 @@ class DataConfig(BaseModel):
 
 
 class DatasetEncodingConfig(BaseModel):
-    max_length: int = 512  # Max context size, padded if shorter
+    context_length: int = 512  # Max context size, padded if shorter
     encoding: str = "r50k_base"
     padding_token: str = "<PAD>"
 
@@ -27,10 +27,11 @@ class ModelConfig(BaseModel):
     num_heads: int = 4
     hidden_dim: int = 128
     num_layers: int = 3
+    dropout: float = 0.1
 
 
 class TrainingConfig(BaseModel):
-    lr: float = 1e-3
+    lr: float = 1e-1
     num_epochs: int = 10
 
 
