@@ -32,7 +32,7 @@ class Trainer:
 
         ## Model
         self.device = (
-            torch.device("cuda:1") if torch.cuda.is_available() else torch.device("cpu")
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         )
         vocab_size = self.encoder.vocab_size
         self.model = TransformerModel(vocab_size=vocab_size, config=config).to(
