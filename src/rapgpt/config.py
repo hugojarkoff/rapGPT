@@ -1,11 +1,7 @@
-from typing import Tuple, Type
-from pydantic import BaseModel
-from pydantic_settings import (
-    BaseSettings,
-    PydanticBaseSettingsSource,
-    SettingsConfigDict,
-    TomlConfigSettingsSource,
-)
+import tomli
+from typing import Type, TypeVar
+from pydantic import BaseModel, ConfigDict
+from pathlib import Path
 
 
 class DataConfig(BaseModel):
@@ -20,7 +16,7 @@ class DatasetEncodingConfig(BaseModel):
 
 class DataloaderConfig(BaseModel):
     shuffle: bool = True
-    batch_size: int = 2
+    batch_size: int = 16
 
 
 class ModelConfig(BaseModel):
@@ -31,11 +27,14 @@ class ModelConfig(BaseModel):
 
 
 class TrainingConfig(BaseModel):
-    lr: float = 1e-1
+    lr: float = 1e-3
     num_epochs: int = 10
 
 
-class Config(BaseSettings):
+T = TypeVar("T", bound="Config")
+
+
+class Config(BaseModel):
     revision: str = "main"
     data: DataConfig = DataConfig()
     dataset_encoding: DatasetEncodingConfig = DatasetEncodingConfig()
@@ -43,15 +42,11 @@ class Config(BaseSettings):
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
 
-    model_config = SettingsConfigDict(toml_file="configs/config.toml")
+    model_config = ConfigDict(extra="forbid")
 
     @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls: Type[BaseSettings],
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
-    ) -> Tuple[PydanticBaseSettingsSource, ...]:
-        return (TomlConfigSettingsSource(settings_cls),)
+    def load_from_toml(cls: Type[T], toml_path: Path | str) -> T:
+        with open(file=toml_path, mode="rb") as f:
+            config_dict = tomli.load(f)
+
+        return cls(**config_dict)
