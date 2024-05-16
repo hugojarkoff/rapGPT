@@ -40,7 +40,7 @@ class Trainer:
         )
 
         ## Loss Function and Optimizer
-        self.criterion = nn.CrossEntropyLoss()
+        self.loss_fn = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.model.parameters(), lr=config.training.lr)
 
     @torch.no_grad()
@@ -74,8 +74,6 @@ class Trainer:
             self.model.train()
             epoch_loss = 0
 
-
-            breaker = 0
             for inputs, targets in self.dataloader:
                 inputs, targets = (
                     inputs.long().to(self.device),
@@ -89,18 +87,15 @@ class Trainer:
                 # Loss computation
                 output_flat = output.reshape(-1, output.shape[2])  # Flatten output
                 targets_flat = targets.reshape(-1)  # Flatten targets
-                loss = self.criterion(output_flat, targets_flat)  # Compute loss
-                logger.info(f"Loss: {loss}")
+                loss = self.loss_fn(output_flat, targets_flat)  # Compute loss
+
+                logger.info(f"Batch loss: {loss}")
                 epoch_loss += loss
 
                 # Backward pass and optimization
                 loss.backward()
                 self.optimizer.step()
                 self.optimizer.zero_grad()
-
-                breaker+=1
-                if breaker==20:
-                    break
 
             # Print the average loss for the epoch
             logger.info(
