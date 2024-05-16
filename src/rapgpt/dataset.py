@@ -14,10 +14,7 @@ class ArtistDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(
-        self, index: int
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
         # Generate a sequence of tokens starting at the given index
         sequence = self.data[index : index + self.encoder.context_length]
         targets = sequence[1:]  # The target is the next token in the sequence
