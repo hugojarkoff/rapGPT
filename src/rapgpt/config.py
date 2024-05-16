@@ -31,6 +31,11 @@ class TrainingConfig(BaseModel):
     num_epochs: int = 10
 
 
+class EvalConfig(BaseModel):
+    sample_text: str = "Les vrais savent"
+    new_tokens: int = 30
+
+
 T = TypeVar("T", bound="Config")
 
 
@@ -41,6 +46,7 @@ class Config(BaseModel):
     dataloader: DataloaderConfig = DataloaderConfig()
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
+    evaluation: EvalConfig = EvalConfig()
 
     model_config = ConfigDict(extra="forbid")
 

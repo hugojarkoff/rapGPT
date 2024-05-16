@@ -65,7 +65,10 @@ class Trainer:
         self,
     ) -> None:
         logger.info("Training model")
-        generated_lyrics = self.generate()
+        generated_lyrics = self.generate(
+            sample_text=self.config.evaluation.sample_text,
+            new_tokens=self.config.evaluation.new_tokens,
+        )
         logger.info(f"Initial generated lyrics: {generated_lyrics}")
 
         # Training loop
@@ -101,4 +104,8 @@ class Trainer:
             logger.info(
                 f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss / len(self.dataloader)}"
             )
-            logger.info(self.generate())
+            generated_lyrics = self.generate(
+                sample_text=self.config.evaluation.sample_text,
+                new_tokens=self.config.evaluation.new_tokens,
+            )
+            logger.info(f"Generated lyrics: {generated_lyrics}")
