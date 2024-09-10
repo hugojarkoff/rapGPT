@@ -139,13 +139,19 @@ class TransformerModel(nn.Module):
         self.ln_f = nn.LayerNorm(self.config.model.hidden_dim)  # final layer norm
         self.lm_head = nn.Linear(self.config.model.hidden_dim, self.vocab_size)
 
+    @property
+    def device(self):
+        """Not ideal but works atm"""
+        return next(self.parameters()).device
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """B, T = x.shape"""
 
         tok_emb = self.token_embedding_table(x)  # (B,T,C)
         pos_emb = self.position_embedding_table(
-            torch.arange(x.shape[1], device="cpu")
+            torch.arange(x.shape[1], device=self.device)
         )  # (T,C)
+
         x = tok_emb + pos_emb  # (B,T,C)
 
         x = self.transformer_blocks(x)  # (B,T,C)

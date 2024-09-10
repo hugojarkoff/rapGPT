@@ -33,11 +33,6 @@ class Trainer:
             artist=self.artist,
             encoder=self.encoder,
         )
-        self.dataloader = DataLoader(
-            self.dataset,
-            batch_size=config.dataloader.batch_size,
-            shuffle=config.dataloader.shuffle,
-        )
 
         ## Model
         self.device = (
@@ -45,7 +40,7 @@ class Trainer:
         )
         vocab_size = self.encoder.vocab_size
         self.model = TransformerModel(vocab_size=vocab_size, config=config).to(
-            self.device
+            device=self.device
         )
 
         ## Loss Function and Optimizer
@@ -90,34 +85,40 @@ class Trainer:
         self.log({"Eval lyrics": generated_lyrics})
 
         # Training loop
-        for _ in range(self.config.training.num_epochs):
+        for step in range(self.config.training.num_steps):
             self.model.train()
 
-            for inputs, targets in self.dataloader:
-                inputs, targets = (
-                    inputs.long().to(self.device),
-                    targets.long().to(self.device),
-                )
-
-                # Forward pass
-                self.optimizer.zero_grad()
-                output = self.model(inputs)
-
-                # Loss computation
-                output_flat = output.reshape(-1, output.shape[2])  # Flatten output
-                targets_flat = targets.reshape(-1)  # Flatten targets
-                loss = self.loss_fn(output_flat, targets_flat)  # Compute loss
-
-                self.log({"Batch loss": loss})
-
-                # Backward pass and optimization
-                loss.backward()
-                self.optimizer.step()
-                self.optimizer.zero_grad()
-
-            # Evaluation loop at the end of epoch
-            generated_lyrics = self.generate(
-                sample_text=self.config.evaluation.sample_text,
-                new_tokens=self.config.evaluation.new_tokens,
+            inputs, targets = self.dataset.get_random_batch(
+                batch_size=self.config.training.batch_size,
+                block_size=self.config.dataset_encoding.context_length
             )
-            self.log({"Eval lyrics": generated_lyrics})
+
+            inputs, targets = (
+                inputs.long().to(self.device),
+                targets.long().to(self.device),
+            )
+
+            # Forward pass
+            self.optimizer.zero_grad()
+            output = self.model(inputs)
+
+            # Loss computation
+            output_flat = output.reshape(-1, output.shape[2])  # Flatten output
+            targets_flat = targets.reshape(-1)  # Flatten targets
+            loss = self.loss_fn(output_flat, targets_flat)  # Compute loss
+
+            self.log({"Batch loss": loss})
+
+            # Backward pass and optimization
+            loss.backward()
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+
+            if step % 250 == 0:
+
+                # Evaluation loop every 500 steps
+                generated_lyrics = self.generate(
+                    sample_text=self.config.evaluation.sample_text,
+                    new_tokens=self.config.evaluation.new_tokens,
+                )
+                self.log({"Eval lyrics": generated_lyrics})

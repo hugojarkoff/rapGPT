@@ -6,9 +6,9 @@ path = "data/french_rap_lyrics"
 [dataset_encoding]
 context_length = 512
 encoding = "r50k_base"
-padding_token = "<PAD>"
 
-[dataloader]
-shuffle = true
-batch_size = 2
+[training]
+batch_size = 24
 
+[wandb]    
+mode = "online"  # offline or online or disabled

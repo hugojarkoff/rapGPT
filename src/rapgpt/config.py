@@ -16,7 +16,6 @@ class DatasetEncodingConfig(BaseModel):
 
 class DataloaderConfig(BaseModel):
     shuffle: bool = True
-    batch_size: int = 16
 
 
 class ModelConfig(BaseModel):
@@ -28,7 +27,8 @@ class ModelConfig(BaseModel):
 
 class TrainingConfig(BaseModel):
     lr: float = 1e-3
-    num_epochs: int = 10
+    num_steps: int = 10000
+    batch_size: int = 16
 
 
 class EvalConfig(BaseModel):
