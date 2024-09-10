@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
 from rapgpt.model import TransformerModel
-from rapgpt.dataset import ArtistDataset
 from rapgpt.config import Config
-from rapgpt.dataset import Encoder
+from rapgpt.encoder import Encoder
 from rapgpt.data import Corpus
 from loguru import logger
 import wandb
@@ -23,15 +21,11 @@ class Trainer:
             group=config.wandb.group,
         )
 
-        # General config
-        self.encoder = Encoder(dataset_encoding_config=config.dataset_encoding)
-        self.corpus = Corpus(data_path=config.data.path)
-        self.artist = self.corpus.artists[0]  # TODO: Change
-
         ## Dataset
-        self.dataset = ArtistDataset(
-            artist=self.artist,
-            encoder=self.encoder,
+        self.encoder = Encoder(dataset_encoding_config=config.dataset_encoding)
+        self.corpus = Corpus(
+            data_path=config.data.path,
+            encoder=self.encoder
         )
 
         ## Model
@@ -88,7 +82,7 @@ class Trainer:
         for step in range(self.config.training.num_steps):
             self.model.train()
 
-            inputs, targets = self.dataset.get_random_batch(
+            inputs, targets, _ = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
                 block_size=self.config.dataset_encoding.context_length
             )
@@ -116,7 +110,7 @@ class Trainer:
 
             if step % 250 == 0:
 
-                # Evaluation loop every 500 steps
+                # Evaluation loop every 250 steps
                 generated_lyrics = self.generate(
                     sample_text=self.config.evaluation.sample_text,
                     new_tokens=self.config.evaluation.new_tokens,
