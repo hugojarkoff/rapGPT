@@ -19,7 +19,7 @@ batch_size = 8
 [evaluation]
 sample_text = "Les vrais savent que "
 new_tokens = 50
-artist_token = 0
+artist_token = 1
 
 [wandb]    
 mode = "online"  # offline or online or disabled
