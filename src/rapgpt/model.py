@@ -147,6 +147,10 @@ class TransformerModel(nn.Module):
     def device(self):
         """Not ideal but works atm"""
         return next(self.parameters()).device
+    
+    @property
+    def learnable_params(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def forward(self, x: torch.Tensor, artists: torch.Tensor) -> torch.Tensor:
         """

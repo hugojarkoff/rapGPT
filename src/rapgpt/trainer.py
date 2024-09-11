@@ -41,7 +41,8 @@ class Trainer:
 
         ## Loss Function and Optimizer
         self.loss_fn = nn.CrossEntropyLoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=config.training.lr)
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=config.training.lr)
+        self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, self.config.scheduler.gamma)
 
     def log(self, message: str | dict[str, loggable]) -> None:
         if isinstance(message, str):
@@ -107,8 +108,10 @@ class Trainer:
         self,
     ) -> None:
         self.log("Training model")
-        generated_lyrics = self.generate()
-        self.log({"Eval lyrics": generated_lyrics})
+        self.log(f"Trainable parameters: {self.model.learnable_params}")
+        self.log({"lr": self.scheduler.get_last_lr()[0]})
+
+        self.evaluate()
 
         # Training loop
         for step in range(self.config.training.num_steps):
@@ -144,3 +147,5 @@ class Trainer:
             # Evaluation loop every evaluation_cycle steps
             if step % self.config.training.evaluation_cycle == 0:    
                 self.evaluate()
+                self.scheduler.step()
+                self.log({"lr": self.scheduler.get_last_lr()[0]})

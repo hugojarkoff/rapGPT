@@ -10,9 +10,10 @@ encoding = "r50k_base"
 [model]
 num_heads = 6
 num_layers = 10
-hidden_dim = 256
+hidden_dim = 328
 
 [training]
+lr = 1e-3
 batch_size = 8
 
 [evaluation]

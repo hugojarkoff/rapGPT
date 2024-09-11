@@ -27,6 +27,9 @@ class TrainingConfig(BaseModel):
     evaluation_cycle: int = 150
     batch_size: int = 16
 
+class ExpSchedulerConfig(BaseModel):
+    gamma: float = 0.9
+
 
 class EvalConfig(BaseModel):
     sample_text: str = "Les vrais savent"
@@ -51,6 +54,7 @@ class Config(BaseModel):
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
     evaluation: EvalConfig = EvalConfig()
+    scheduler: ExpSchedulerConfig = ExpSchedulerConfig()
     wandb: WandbConfig = WandbConfig()
 
     model_config = ConfigDict(extra="forbid")
