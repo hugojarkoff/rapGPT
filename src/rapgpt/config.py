@@ -9,13 +9,8 @@ class DataConfig(BaseModel):
 
 
 class DatasetEncodingConfig(BaseModel):
-    context_length: int = 512  # Max context size, padded if shorter
+    context_length: int = 512
     encoding: str = "r50k_base"
-    padding_token: str = "<PAD>"
-
-
-class DataloaderConfig(BaseModel):
-    shuffle: bool = True
 
 
 class ModelConfig(BaseModel):
@@ -28,12 +23,15 @@ class ModelConfig(BaseModel):
 class TrainingConfig(BaseModel):
     lr: float = 1e-3
     num_steps: int = 10000
+    num_steps_val: int = 250
+    evaluation_cycle: int = 150
     batch_size: int = 16
 
 
 class EvalConfig(BaseModel):
     sample_text: str = "Les vrais savent"
     new_tokens: int = 30
+    artist_token: int = 0
 
 
 class WandbConfig(BaseModel):
@@ -50,7 +48,6 @@ class Config(BaseModel):
     revision: str = "main"
     data: DataConfig = DataConfig()
     dataset_encoding: DatasetEncodingConfig = DatasetEncodingConfig()
-    dataloader: DataloaderConfig = DataloaderConfig()
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
     evaluation: EvalConfig = EvalConfig()

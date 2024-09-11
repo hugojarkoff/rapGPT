@@ -4,11 +4,21 @@ revision = "main"
 path = "data/french_rap_lyrics"
 
 [dataset_encoding]
-context_length = 512
+context_length = 1024
 encoding = "r50k_base"
 
+[model]
+num_heads = 6
+num_layers = 10
+hidden_dim = 256
+
 [training]
-batch_size = 24
+batch_size = 8
+
+[evaluation]
+sample_text = "Les vrais savent que "
+new_tokens = 50
+artist_token = 0
 
 [wandb]    
-mode = "disabled"  # offline or online or disabled
+mode = "online"  # offline or online or disabled

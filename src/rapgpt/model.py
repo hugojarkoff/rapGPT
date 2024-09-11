@@ -170,13 +170,18 @@ class TransformerModel(nn.Module):
         return logits
 
     @torch.no_grad()
-    def generate(self, x: torch.Tensor, new_tokens: int) -> torch.Tensor:
+    def generate(
+        self, 
+        x: torch.Tensor, 
+        new_tokens: int,
+        artist_token: int = 0
+    ) -> torch.Tensor:
         # idx is (B, T) array of indices in the current context
         for _ in range(new_tokens):
             # crop x to the last block_size tokens
             idx_cond = x[:, -self.config.dataset_encoding.context_length :]
             # get the predictions
-            logits = self(idx_cond, torch.Tensor([0]).to(self.device, dtype=torch.long))
+            logits = self(idx_cond, torch.Tensor([artist_token]).to(self.device, dtype=torch.long))
             # focus only on the last time step
             logits = logits[:, -1, :]  # becomes (B, C)
             # apply softmax to get probabilities

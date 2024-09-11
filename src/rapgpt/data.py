@@ -24,36 +24,60 @@ class Corpus:
         self.artists: list[Artist] = []
         for path in self.data_path.glob("*.txt"):
             artist = Artist(path)
-            if len(artist.lyrics) < 1000:
+            if len(artist.lyrics) < 50000:
                 continue 
             self.artists.append(Artist(path))
 
         self.artist_encoding = {artist.name:i for i, artist in enumerate(self.artists)}
+        self.split_val_train: float = 0.8
 
     @cached_property
-    def data(self) -> dict[str, torch.Tensor]:
+    def train_data(self) -> dict[str, torch.Tensor]:
         return {
-            artist.name: torch.Tensor(self.encoder.encode_data(artist.lyrics))
+            artist.name: torch.Tensor(
+                self.encoder.encode_data(
+                    artist.lyrics[: int(len(artist.lyrics) * self.split_val_train)]
+                )
+            )
+            for artist in self.artists
+        }
+    
+    @cached_property
+    def val_data(self) -> dict[str, torch.Tensor]:
+        return {
+            artist.name: torch.Tensor(
+                self.encoder.encode_data(
+                    artist.lyrics[int(len(artist.lyrics) * self.split_val_train) :]
+                )
+            )
             for artist in self.artists
         }
 
-    def get_random_batch(self, batch_size: int, block_size: int):
+    def get_random_batch(self, batch_size: int, block_size: int, split: str = "train"):
         batch_inputs = []
         batch_targets = []
         selected_artists = []
 
+        match split:
+            case "train":
+                source = self.train_data
+            case "val":
+                source = self.val_data
+            case _:
+                raise ValueError(f"Incorrect split: {split}")
+
         for _ in range(batch_size):
             # Randomly select an artist
-            artist_name = random.choice(list(self.data.keys()))
+            artist_name = random.choice(list(source.keys()))
 
             # Save artist at the same position from batch
             selected_artists.append(self.artist_encoding[artist_name])
             
             # Get the tensor for the selected artist
-            lyrics_tensor = self.data[artist_name]
+            lyrics_tensor = source[artist_name]
             
             # Ensure there are enough tokens for a full passage
-            max_start_idx = lyrics_tensor.size(0) - block_size
+            max_start_idx = lyrics_tensor.size(0) - block_size - 1
             
             if max_start_idx <= 0:
                 raise ValueError(f"Lyrics for {artist_name} are too short for the given block size!")
