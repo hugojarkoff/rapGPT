@@ -113,16 +113,20 @@ class TransformerBlock(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    def __init__(self, vocab_size: int, config: Config) -> None:
+    def __init__(self, vocab_size: int, artists_size: int, config: Config) -> None:
         super().__init__()
         self.config = config
         self.vocab_size = vocab_size
+        self.artists_size = artists_size
 
         self.token_embedding_table = nn.Embedding(
             self.vocab_size, self.config.model.hidden_dim
         )
         self.position_embedding_table = nn.Embedding(
             self.config.dataset_encoding.context_length, self.config.model.hidden_dim
+        )
+        self.artist_embedding_table = nn.Embedding(
+            self.artists_size, self.config.model.hidden_dim
         )
 
         self.transformer_blocks = nn.Sequential(
@@ -144,15 +148,19 @@ class TransformerModel(nn.Module):
         """Not ideal but works atm"""
         return next(self.parameters()).device
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """B, T = x.shape"""
+    def forward(self, x: torch.Tensor, artists: torch.Tensor) -> torch.Tensor:
+        """
+        B, T = x.shape
+        B = artists.shape
+        """
 
         tok_emb = self.token_embedding_table(x)  # (B,T,C)
         pos_emb = self.position_embedding_table(
             torch.arange(x.shape[1], device=self.device)
         )  # (T,C)
+        art_emb = self.artist_embedding_table(artists).unsqueeze(1)  # (B,1,C)
 
-        x = tok_emb + pos_emb  # (B,T,C)
+        x = tok_emb + pos_emb + art_emb # (B,T,C)
 
         x = self.transformer_blocks(x)  # (B,T,C)
 
@@ -168,7 +176,7 @@ class TransformerModel(nn.Module):
             # crop x to the last block_size tokens
             idx_cond = x[:, -self.config.dataset_encoding.context_length :]
             # get the predictions
-            logits = self(idx_cond)
+            logits = self(idx_cond, torch.Tensor([0]).to(self.device, dtype=torch.long))
             # focus only on the last time step
             logits = logits[:, -1, :]  # becomes (B, C)
             # apply softmax to get probabilities

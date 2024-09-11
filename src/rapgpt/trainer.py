@@ -33,7 +33,11 @@ class Trainer:
             torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         )
         vocab_size = self.encoder.vocab_size
-        self.model = TransformerModel(vocab_size=vocab_size, config=config).to(
+        self.model = TransformerModel(
+            vocab_size=vocab_size, 
+            artists_size=len(self.corpus.artist_encoding),
+            config=config,
+        ).to(
             device=self.device
         )
 
@@ -82,19 +86,20 @@ class Trainer:
         for step in range(self.config.training.num_steps):
             self.model.train()
 
-            inputs, targets, _ = self.corpus.get_random_batch(
+            inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
                 block_size=self.config.dataset_encoding.context_length
             )
 
-            inputs, targets = (
+            inputs, targets, artists = (
                 inputs.long().to(self.device),
                 targets.long().to(self.device),
+                artists.long().to(self.device)
             )
 
             # Forward pass
             self.optimizer.zero_grad()
-            output = self.model(inputs)
+            output = self.model(inputs, artists)
 
             # Loss computation
             output_flat = output.reshape(-1, output.shape[2])  # Flatten output

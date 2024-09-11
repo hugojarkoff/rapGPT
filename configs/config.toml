@@ -11,4 +11,4 @@ encoding = "r50k_base"
 batch_size = 24
 
 [wandb]    
-mode = "online"  # offline or online or disabled
+mode = "disabled"  # offline or online or disabled
