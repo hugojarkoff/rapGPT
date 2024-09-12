@@ -8,9 +8,13 @@ class DataConfig(BaseModel):
     path: str = "data/french_rap_lyrics"
 
 
-class DatasetEncodingConfig(BaseModel):
+class CorpusConfig(BaseModel):
+    seed: int = 42
     context_length: int = 512
     encoding: str = "r50k_base"
+    split_train_val: float = 0.8
+    # Minimum number of tokens in artist lyrics, else discarded from Corpus
+    min_artist_length: int = 50000
 
 
 class ModelConfig(BaseModel):
@@ -22,10 +26,15 @@ class ModelConfig(BaseModel):
 
 class TrainingConfig(BaseModel):
     lr: float = 1e-3
-    num_steps: int = 10000
-    num_steps_val: int = 250
-    evaluation_cycle: int = 150
+    seed: int = 42
     batch_size: int = 16
+    # Total training steps (no epochs in this project)
+    num_training_steps: int = 10000
+    # Num validation steps per evaluation cycle
+    num_validation_steps: int = 250
+    # Launch evaluation cycle every evaluation_cycle steps
+    evaluation_cycle: int = 150
+
 
 class ExpSchedulerConfig(BaseModel):
     gamma: float = 0.9
@@ -50,7 +59,7 @@ T = TypeVar("T", bound="Config")
 class Config(BaseModel):
     revision: str = "main"
     data: DataConfig = DataConfig()
-    dataset_encoding: DatasetEncodingConfig = DatasetEncodingConfig()
+    corpus: CorpusConfig = CorpusConfig()
     model: ModelConfig = ModelConfig()
     training: TrainingConfig = TrainingConfig()
     evaluation: EvalConfig = EvalConfig()

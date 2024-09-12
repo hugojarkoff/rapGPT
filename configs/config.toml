@@ -3,7 +3,7 @@ revision = "main"
 [data]
 path = "data/french_rap_lyrics"
 
-[dataset_encoding]
+[corpus]
 context_length = 1024
 encoding = "r50k_base"
 
@@ -13,6 +13,7 @@ num_layers = 10
 hidden_dim = 328
 
 [training]
+seed = 42
 lr = 1e-3
 batch_size = 8
 

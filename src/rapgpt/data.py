@@ -1,5 +1,6 @@
 from pathlib import Path
 from rapgpt.encoder import Encoder
+from rapgpt.config import Config
 import torch
 from functools import cached_property
 import random
@@ -17,19 +18,21 @@ class Artist:
 
 
 class Corpus:
-    def __init__(self, data_path: str | Path, encoder: Encoder) -> None:
-        self.data_path: Path = Path(data_path)
+    def __init__(self, config: Config, encoder: Encoder) -> None:
+        self.config = config        
         self.encoder = encoder
+        
+        self.data_path: Path = Path(self.config.data.path)
         
         self.artists: list[Artist] = []
         for path in self.data_path.glob("*.txt"):
             artist = Artist(path)
-            if len(artist.lyrics) < 50000:
+            if len(artist.lyrics) < self.config.corpus.min_artist_length:
                 continue 
             self.artists.append(Artist(path))
 
         self.artist_encoding = {artist.name:i for i, artist in enumerate(self.artists)}
-        self.split_val_train: float = 0.8
+        self.split_train_val = self.config.corpus.split_train_val
 
     @cached_property
     def train_data(self) -> dict[str, torch.Tensor]:

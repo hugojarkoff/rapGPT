@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import random
+import numpy as np
 from rapgpt.model import TransformerModel
 from rapgpt.config import Config
 from rapgpt.encoder import Encoder
@@ -14,6 +16,9 @@ loggable = str | int | float
 class Trainer:
     def __init__(self, config: Config) -> None:
         self.config = config
+        self.set_seed(self.config.training.seed)
+
+        ## Logging Server
         wandb.init(
             project=config.wandb.project,
             mode=config.wandb.mode,
@@ -22,9 +27,9 @@ class Trainer:
         )
 
         ## Dataset
-        self.encoder = Encoder(dataset_encoding_config=config.dataset_encoding)
+        self.encoder = Encoder(dataset_encoding_config=self.config.dataset_encoding)
         self.corpus = Corpus(
-            data_path=config.data.path,
+            config=self.config,
             encoder=self.encoder
         )
 
@@ -44,6 +49,11 @@ class Trainer:
         self.optimizer = optim.AdamW(self.model.parameters(), lr=config.training.lr)
         self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, self.config.scheduler.gamma)
 
+    def set_seed(self, seed: int) -> None:
+        random.seed(seed)
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+
     def log(self, message: str | dict[str, loggable]) -> None:
         if isinstance(message, str):
             logger.info(message)
@@ -53,10 +63,8 @@ class Trainer:
             logger.info(f"{k}:{v}")
         wandb.log(message)
 
-    @torch.no_grad()
-    def generate(self) -> str:
-        self.model.eval()
 
+    def generate(self) -> str:
         # Encode the seed text
         sample_input = self.encoder.encode_data(self.config.evaluation.sample_text)
         sample_input = torch.tensor(sample_input).unsqueeze(0).to(self.device)
@@ -92,16 +100,14 @@ class Trainer:
             output = self.model(inputs, artists)
 
             # Loss computation
-            output_flat = output.reshape(-1, output.shape[2])  # Flatten output
-            targets_flat = targets.reshape(-1)  # Flatten targets
-            val_loss += self.loss_fn(output_flat, targets_flat)  # Compute loss
+            output_flat = output.reshape(-1, output.shape[2])
+            targets_flat = targets.reshape(-1)
+            val_loss += self.loss_fn(output_flat, targets_flat)
 
         self.log({"val_loss": val_loss / self.config.training.num_steps_val})
 
-        # Evaluation loop every 250 steps
         generated_lyrics = self.generate()
         self.log({"eval_lyrics": generated_lyrics})
-
 
 
     def train(
