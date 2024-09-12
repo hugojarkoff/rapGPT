@@ -5,6 +5,9 @@ import torch
 from functools import cached_property
 import random
 
+class Lyrics(str):
+    pass
+
 class ArtistLyrics:
     @classmethod
     def from_file(cls, filename: Path) -> str:
@@ -39,7 +42,7 @@ class Corpus:
         return {
             artist.name: torch.Tensor(
                 self.encoder.encode_data(
-                    artist.lyrics[: int(len(artist.lyrics) * self.split_val_train)]
+                    artist.lyrics[: int(len(artist.lyrics) * self.split_train_val)]
                 )
             )
             for artist in self.artists
@@ -50,7 +53,7 @@ class Corpus:
         return {
             artist.name: torch.Tensor(
                 self.encoder.encode_data(
-                    artist.lyrics[int(len(artist.lyrics) * self.split_val_train) :]
+                    artist.lyrics[int(len(artist.lyrics) * self.split_train_val) :]
                 )
             )
             for artist in self.artists

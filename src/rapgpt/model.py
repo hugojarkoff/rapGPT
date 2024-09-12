@@ -123,7 +123,7 @@ class TransformerModel(nn.Module):
             self.vocab_size, self.config.model.hidden_dim
         )
         self.position_embedding_table = nn.Embedding(
-            self.config.dataset_encoding.context_length, self.config.model.hidden_dim
+            self.config.corpus.context_length, self.config.model.hidden_dim
         )
         self.artist_embedding_table = nn.Embedding(
             self.artists_size, self.config.model.hidden_dim
@@ -134,7 +134,7 @@ class TransformerModel(nn.Module):
                 TransformerBlock(
                     hidden_dim=self.config.model.hidden_dim,
                     num_heads=self.config.model.num_heads,
-                    context_length=self.config.dataset_encoding.context_length,
+                    context_length=self.config.corpus.context_length,
                     dropout=self.config.model.dropout,
                 )
                 for _ in range(self.config.model.num_layers)
@@ -183,7 +183,7 @@ class TransformerModel(nn.Module):
         # idx is (B, T) array of indices in the current context
         for _ in range(new_tokens):
             # crop x to the last block_size tokens
-            idx_cond = x[:, -self.config.dataset_encoding.context_length :]
+            idx_cond = x[:, -self.config.corpus.context_length :]
             # get the predictions
             logits = self(idx_cond, torch.Tensor([artist_token]).to(self.device, dtype=torch.long))
             # focus only on the last time step

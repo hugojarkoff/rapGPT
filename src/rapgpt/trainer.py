@@ -6,7 +6,7 @@ import numpy as np
 from rapgpt.model import TransformerModel
 from rapgpt.config import Config
 from rapgpt.encoder import Encoder
-from rapgpt.data import Corpus
+from rapgpt.data import Corpus, Lyrics
 from loguru import logger
 import wandb
 
@@ -27,7 +27,7 @@ class Trainer:
         )
 
         ## Dataset
-        self.encoder = Encoder(dataset_encoding_config=self.config.dataset_encoding)
+        self.encoder = Encoder(config=self.config)
         self.corpus = Corpus(
             config=self.config,
             encoder=self.encoder
@@ -55,6 +55,13 @@ class Trainer:
         np.random.seed(seed)
 
     def log(self, message: str | dict[str, loggable]) -> None:
+        if isinstance(message, Lyrics):
+            logger.info(message)
+            columns = ["generated_lyrics"]
+            data = [[message]]
+            table = wandb.Table(columns=columns, data=data)
+            wandb.log({"generated_lyrics": table})
+            return
         if isinstance(message, str):
             logger.info(message)
             return
@@ -84,10 +91,10 @@ class Trainer:
         
         val_loss = 0.
 
-        for _ in range(self.config.training.num_steps_val):
+        for _ in range(self.config.training.num_validation_steps):
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
-                block_size=self.config.dataset_encoding.context_length,
+                block_size=self.config.corpus.context_length,
                 split="val"
             )
 
@@ -104,10 +111,10 @@ class Trainer:
             targets_flat = targets.reshape(-1)
             val_loss += self.loss_fn(output_flat, targets_flat)
 
-        self.log({"val_loss": val_loss / self.config.training.num_steps_val})
+        self.log({"val_loss": val_loss / self.config.training.num_validation_steps})
 
         generated_lyrics = self.generate()
-        self.log({"eval_lyrics": generated_lyrics})
+        self.log(Lyrics(generated_lyrics))
 
 
     def train(
@@ -120,12 +127,12 @@ class Trainer:
         self.evaluate()
 
         # Training loop
-        for step in range(self.config.training.num_steps):
+        for step in range(self.config.training.num_training_steps):
             self.model.train()
 
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
-                block_size=self.config.dataset_encoding.context_length
+                block_size=self.config.corpus.context_length
             )
 
             inputs, targets, artists = (
