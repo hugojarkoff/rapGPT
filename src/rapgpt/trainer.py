@@ -27,6 +27,7 @@ class Trainer:
             mode=config.wandb.mode,
             tags=config.wandb.tags,
             group=config.wandb.group,
+            config=config.model_dump()
         )
         checkpoint_dir = Path(self.config.checkpoint.save_path) / run.name
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
