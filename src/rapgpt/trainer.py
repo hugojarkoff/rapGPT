@@ -10,6 +10,7 @@ from rapgpt.encoder import Encoder
 from rapgpt.data import Corpus, Lyrics
 from rapgpt.callbacks import Checkpoint
 from loguru import logger
+from pathlib import Path
 import wandb
 
 loggable = str | int | float
@@ -27,6 +28,8 @@ class Trainer:
             tags=config.wandb.tags,
             group=config.wandb.group,
         )
+        checkpoint_dir = Path(self.config.checkpoint.save_path) / run.name
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         ## Dataset
         self.encoder = Encoder(config=self.config)
@@ -34,6 +37,8 @@ class Trainer:
             config=self.config,
             encoder=self.encoder
         )
+        # Save artist tokens
+        self.corpus.dump_artists_tokens(checkpoint_dir / "artists_tokens.txt")
 
         ## Model
         self.device = (
@@ -42,7 +47,7 @@ class Trainer:
         vocab_size = self.encoder.vocab_size
         self.model = TransformerModel(
             vocab_size=vocab_size, 
-            artists_size=len(self.corpus.artist_encoding),
+            artists_size=len(self.corpus.artists_tokens),
             config=config,
         ).to(device=self.device)
 

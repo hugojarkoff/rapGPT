@@ -16,7 +16,7 @@ class ArtistLyrics:
 
 class Artist:
     def __init__(self, artist_file: Path) -> None:
-        self.name: str = artist_file.name.strip(".txt")
+        self.name: str = artist_file.name.rstrip(".txt")
         self.lyrics = ArtistLyrics.from_file(artist_file)
 
 
@@ -34,8 +34,15 @@ class Corpus:
                 continue 
             self.artists.append(Artist(path))
 
-        self.artist_encoding = {artist.name:i for i, artist in enumerate(self.artists)}
+        self.artists_tokens = {artist.name:i for i, artist in enumerate(self.artists)}
         self.split_train_val = self.config.corpus.split_train_val
+
+    def dump_artists_tokens(self, filepath: Path) -> None:
+        """Saves artists tokens"""
+        with open(filepath, "w+") as f:
+            for k,v in self.artists_tokens.items():
+                f.write(f"{k}:{v}\n")
+        
 
     @cached_property
     def train_data(self) -> dict[str, torch.Tensor]:
@@ -77,7 +84,7 @@ class Corpus:
             artist_name = random.choice(list(source.keys()))
 
             # Save artist at the same position from batch
-            selected_artists.append(self.artist_encoding[artist_name])
+            selected_artists.append(self.artists_tokens[artist_name])
             
             # Get the tensor for the selected artist
             lyrics_tensor = source[artist_name]
