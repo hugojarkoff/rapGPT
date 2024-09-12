@@ -52,6 +52,9 @@ class WandbConfig(BaseModel):
     group: str = "dev"
     tags: list[str] = ["dev", "debug"]
 
+class CheckpointCallbackConfig(BaseModel):
+    save_path: str = "checkpoints"
+
 
 T = TypeVar("T", bound="Config")
 
@@ -65,6 +68,7 @@ class Config(BaseModel):
     evaluation: EvalConfig = EvalConfig()
     scheduler: ExpSchedulerConfig = ExpSchedulerConfig()
     wandb: WandbConfig = WandbConfig()
+    checkpoint: CheckpointCallbackConfig = CheckpointCallbackConfig()
 
     model_config = ConfigDict(extra="forbid")
 

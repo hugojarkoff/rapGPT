@@ -8,6 +8,7 @@ from rapgpt.model import TransformerModel
 from rapgpt.config import Config
 from rapgpt.encoder import Encoder
 from rapgpt.data import Corpus, Lyrics
+from rapgpt.callbacks import Checkpoint
 from loguru import logger
 import wandb
 
@@ -20,7 +21,7 @@ class Trainer:
         self.set_seed(self.config.training.seed)
 
         ## Logging Server
-        wandb.init(
+        run = wandb.init(
             project=config.wandb.project,
             mode=config.wandb.mode,
             tags=config.wandb.tags,
@@ -50,6 +51,9 @@ class Trainer:
         self.optimizer = optim.AdamW(self.model.parameters(), lr=config.training.lr)
         self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, self.config.scheduler.gamma)
         self.perplexity = Perplexity(device=self.device)
+
+        ## Checkpoint Callback
+        self.checkpoint = Checkpoint(self.config,run.name)
 
     def set_seed(self, seed: int) -> None:
         random.seed(seed)
@@ -123,6 +127,8 @@ class Trainer:
         generated_lyrics = self.generate()
         self.log(Lyrics(generated_lyrics))
 
+        # Callback
+        self.checkpoint.update(perplexity, self.model)
 
     def train(
         self,
