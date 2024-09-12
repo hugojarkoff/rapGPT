@@ -124,6 +124,8 @@ tomli==2.0.1
     # via rapgpt
 torch==2.2.2
     # via rapgpt
+torcheval==0.0.7
+    # via rapgpt
 tqdm==4.66.4
     # via kaggle
 triton==2.2.0
@@ -132,6 +134,7 @@ typing-extensions==4.11.0
     # via pydantic
     # via pydantic-core
     # via torch
+    # via torcheval
 urllib3==2.2.1
     # via kaggle
     # via requests

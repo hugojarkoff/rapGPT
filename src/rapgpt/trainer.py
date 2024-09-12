@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torcheval.metrics import Perplexity
 import random
 import numpy as np
 from rapgpt.model import TransformerModel
@@ -48,6 +49,7 @@ class Trainer:
         self.loss_fn = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(self.model.parameters(), lr=config.training.lr)
         self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, self.config.scheduler.gamma)
+        self.perplexity = Perplexity(device=self.device)
 
     def set_seed(self, seed: int) -> None:
         random.seed(seed)
@@ -110,8 +112,13 @@ class Trainer:
             output_flat = output.reshape(-1, output.shape[2])
             targets_flat = targets.reshape(-1)
             val_loss += self.loss_fn(output_flat, targets_flat)
+            self.perplexity.update(output, targets)
 
         self.log({"val_loss": val_loss / self.config.training.num_validation_steps})
+        
+        perplexity = self.perplexity.compute().item()
+        self.log({"val_perplexity": perplexity})
+        self.perplexity.reset()
 
         generated_lyrics = self.generate()
         self.log(Lyrics(generated_lyrics))
@@ -149,8 +156,13 @@ class Trainer:
             output_flat = output.reshape(-1, output.shape[2])  # Flatten output
             targets_flat = targets.reshape(-1)  # Flatten targets
             loss = self.loss_fn(output_flat, targets_flat)  # Compute loss
+            self.perplexity.update(output, targets)
 
             self.log({"train_loss": loss})
+
+            perplexity = self.perplexity.compute().item()
+            self.log({"train_perplexity": perplexity})
+            self.perplexity.reset()
 
             # Backward pass and optimization
             loss.backward()
