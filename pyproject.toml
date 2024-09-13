@@ -23,6 +23,10 @@ requires-python = ">= 3.8"
 data = [
     "kaggle>=1.6"
 ]
+app = [
+    "huggingface-hub[cli]>=0.24.7",
+    "gradio>=4.44.0",
+]
 
 [project.scripts]
 
