@@ -14,4 +14,4 @@ class Encoder:
 
     @property
     def vocab_size(self) -> int:
-        return self.encoding.max_token_value + 1
+        return self.encoding.max_token_value
