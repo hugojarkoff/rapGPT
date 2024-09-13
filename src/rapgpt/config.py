@@ -9,8 +9,6 @@ class DataConfig(BaseModel):
 
 
 class CorpusConfig(BaseModel):
-    seed: int = 42
-    context_length: int = 512
     encoding: str = "r50k_base"
     split_train_val: float = 0.8
     # Minimum number of tokens in artist lyrics, else discarded from Corpus
@@ -22,7 +20,7 @@ class ModelConfig(BaseModel):
     hidden_dim: int = 128
     num_layers: int = 3
     dropout: float = 0.1
-
+    context_length: int = 512
 
 class TrainingConfig(BaseModel):
     lr: float = 1e-3

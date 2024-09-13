@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from rapgpt.config import Config
-
 
 class Head(nn.Module):
     def __init__(
@@ -113,35 +111,48 @@ class TransformerBlock(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    def __init__(self, vocab_size: int, artists_size: int, config: Config) -> None:
+    def __init__(
+        self, 
+        vocab_size: int, 
+        artists_size: int, 
+        num_layers: int,
+        hidden_dim: int,
+        num_heads: int,
+        context_length: int,
+        dropout: float = 0.1,
+    ) -> None:
         super().__init__()
-        self.config = config
         self.vocab_size = vocab_size
         self.artists_size = artists_size
+        self.num_layers = num_layers
+        self.hidden_dim = hidden_dim
+        self.num_heads = num_heads
+        self.context_length = context_length
+        self.dropout = dropout
 
         self.token_embedding_table = nn.Embedding(
-            self.vocab_size, self.config.model.hidden_dim
+            self.vocab_size, self.hidden_dim
         )
         self.position_embedding_table = nn.Embedding(
-            self.config.corpus.context_length, self.config.model.hidden_dim
+            self.context_length, self.hidden_dim
         )
         self.artist_embedding_table = nn.Embedding(
-            self.artists_size, self.config.model.hidden_dim
+            self.artists_size, self.hidden_dim
         )
 
         self.transformer_blocks = nn.Sequential(
             *[
                 TransformerBlock(
-                    hidden_dim=self.config.model.hidden_dim,
-                    num_heads=self.config.model.num_heads,
-                    context_length=self.config.corpus.context_length,
-                    dropout=self.config.model.dropout,
+                    hidden_dim=self.hidden_dim,
+                    num_heads=self.num_heads,
+                    context_length=self.context_length,
+                    dropout=self.dropout,
                 )
-                for _ in range(self.config.model.num_layers)
+                for _ in range(self.num_layers)
             ]
         )
-        self.ln_f = nn.LayerNorm(self.config.model.hidden_dim)  # final layer norm
-        self.lm_head = nn.Linear(self.config.model.hidden_dim, self.vocab_size)
+        self.ln_f = nn.LayerNorm(self.hidden_dim)  # final layer norm
+        self.lm_head = nn.Linear(self.hidden_dim, self.vocab_size)
 
     @property
     def device(self):
@@ -183,7 +194,7 @@ class TransformerModel(nn.Module):
         # idx is (B, T) array of indices in the current context
         for _ in range(new_tokens):
             # crop x to the last block_size tokens
-            idx_cond = x[:, -self.config.corpus.context_length :]
+            idx_cond = x[:, -self.context_length :]
             # get the predictions
             logits = self(idx_cond, torch.Tensor([artist_token]).to(self.device, dtype=torch.long))
             # focus only on the last time step

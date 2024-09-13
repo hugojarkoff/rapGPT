@@ -4,10 +4,10 @@ revision = "main"
 path = "data/french_rap_lyrics"
 
 [corpus]
-context_length = 1024
 encoding = "r50k_base"
 
 [model]
+context_length = 1024
 num_heads = 6
 num_layers = 15
 hidden_dim = 512
@@ -23,4 +23,4 @@ new_tokens = 50
 artist_token = 1
 
 [wandb]    
-mode = "online"  # offline or online or disabled
+mode = "disabled"  # offline or online or disabled

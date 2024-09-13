@@ -49,7 +49,7 @@ class Trainer:
         self.model = TransformerModel(
             vocab_size=vocab_size, 
             artists_size=len(self.corpus.artists_tokens),
-            config=config,
+            **self.config.model.model_dump()
         ).to(device=self.device)
 
         ## Loss Function and Optimizer

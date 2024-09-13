@@ -5,7 +5,6 @@ from rapgpt.config import Config
 class Encoder:
     def __init__(self, config: Config) -> None:
         self.encoding = tiktoken.get_encoding(config.corpus.encoding)
-        self.context_length = config.corpus.context_length
 
     def encode_data(self, data: str) -> list[int]:
         return self.encoding.encode(data)
