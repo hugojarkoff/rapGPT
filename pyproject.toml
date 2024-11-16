@@ -28,11 +28,6 @@ app = [
     "gradio>=4.44.0",
 ]
 
-[project.scripts]
-
-[tool.rye.scripts]
-lint = { chain = ["ruff format .", "ruff check --fix ."] }
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
