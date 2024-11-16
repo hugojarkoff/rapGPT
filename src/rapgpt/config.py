@@ -47,7 +47,7 @@ class EvalConfig(BaseModel):
 
 class WandbConfig(BaseModel):
     project: str = "rapGPT"
-    mode: str = "online"  # offline or online or disabled
+    mode: str = "offline"  # offline or online or disabled
     group: str = "dev"
     tags: list[str] = ["dev", "debug"]
 

@@ -19,7 +19,9 @@ config = Config.load_from_toml(CONFIG)
 encoder = Encoder(config=config)
 
 model = TransformerModel(
-    vocab_size=encoder.vocab_size, artists_size=len(artists_tokens), config=config
+    vocab_size=encoder.vocab_size, 
+    artists_size=len(artists_tokens), 
+    **config.model.model_dump()
 )
 model.load_state_dict(
     torch.load(CHECKPOINT, weights_only=True, map_location=torch.device("cpu"))
