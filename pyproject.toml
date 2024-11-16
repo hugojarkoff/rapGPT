@@ -25,7 +25,7 @@ data = [
 ]
 app = [
     "huggingface-hub[cli]>=0.24.7",
-    "gradio>=4.44.0",
+    "gradio>=4.44.1",
 ]
 
 [build-system]
