@@ -5,8 +5,10 @@ from rapgpt.config import Config
 from rapgpt.model import TransformerModel
 from loguru import logger
 
+
 class Callback:
     pass
+
 
 class Checkpoint(Callback):
     def __init__(self, config: Config, exp_name: str) -> None:

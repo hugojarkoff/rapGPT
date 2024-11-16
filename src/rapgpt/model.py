@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Head(nn.Module):
     def __init__(
         self, hidden_dim: int, head_size: int, context_length: int, dropout: float = 0.1
@@ -112,9 +113,9 @@ class TransformerBlock(nn.Module):
 
 class TransformerModel(nn.Module):
     def __init__(
-        self, 
-        vocab_size: int, 
-        artists_size: int, 
+        self,
+        vocab_size: int,
+        artists_size: int,
         num_layers: int,
         hidden_dim: int,
         num_heads: int,
@@ -130,15 +131,11 @@ class TransformerModel(nn.Module):
         self.context_length = context_length
         self.dropout = dropout
 
-        self.token_embedding_table = nn.Embedding(
-            self.vocab_size, self.hidden_dim
-        )
+        self.token_embedding_table = nn.Embedding(self.vocab_size, self.hidden_dim)
         self.position_embedding_table = nn.Embedding(
             self.context_length, self.hidden_dim
         )
-        self.artist_embedding_table = nn.Embedding(
-            self.artists_size, self.hidden_dim
-        )
+        self.artist_embedding_table = nn.Embedding(self.artists_size, self.hidden_dim)
 
         self.transformer_blocks = nn.Sequential(
             *[
@@ -158,7 +155,7 @@ class TransformerModel(nn.Module):
     def device(self):
         """Not ideal but works atm"""
         return next(self.parameters()).device
-    
+
     @property
     def learnable_params(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -175,7 +172,7 @@ class TransformerModel(nn.Module):
         )  # (T,C)
         art_emb = self.artist_embedding_table(artists).unsqueeze(1)  # (B,1,C)
 
-        x = tok_emb + pos_emb + art_emb # (B,T,C)
+        x = tok_emb + pos_emb + art_emb  # (B,T,C)
 
         x = self.transformer_blocks(x)  # (B,T,C)
 
@@ -186,17 +183,16 @@ class TransformerModel(nn.Module):
 
     @torch.no_grad()
     def generate(
-        self, 
-        x: torch.Tensor, 
-        new_tokens: int,
-        artist_token: int = 0
+        self, x: torch.Tensor, new_tokens: int, artist_token: int = 0
     ) -> torch.Tensor:
         # idx is (B, T) array of indices in the current context
         for _ in range(new_tokens):
             # crop x to the last block_size tokens
             idx_cond = x[:, -self.context_length :]
             # get the predictions
-            logits = self(idx_cond, torch.Tensor([artist_token]).to(self.device, dtype=torch.long))
+            logits = self(
+                idx_cond, torch.Tensor([artist_token]).to(self.device, dtype=torch.long)
+            )
             # focus only on the last time step
             logits = logits[:, -1, :]  # becomes (B, C)
             # apply softmax to get probabilities

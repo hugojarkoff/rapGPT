@@ -22,6 +22,7 @@ class ModelConfig(BaseModel):
     dropout: float = 0.1
     context_length: int = 512
 
+
 class TrainingConfig(BaseModel):
     lr: float = 1e-3
     seed: int = 42
@@ -49,6 +50,7 @@ class WandbConfig(BaseModel):
     mode: str = "online"  # offline or online or disabled
     group: str = "dev"
     tags: list[str] = ["dev", "debug"]
+
 
 class CheckpointCallbackConfig(BaseModel):
     save_path: str = "checkpoints"

@@ -27,17 +27,14 @@ class Trainer:
             mode=config.wandb.mode,
             tags=config.wandb.tags,
             group=config.wandb.group,
-            config=config.model_dump()
+            config=config.model_dump(),
         )
         checkpoint_dir = Path(self.config.checkpoint.save_path) / run.name
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         ## Dataset
         self.encoder = Encoder(config=self.config)
-        self.corpus = Corpus(
-            config=self.config,
-            encoder=self.encoder
-        )
+        self.corpus = Corpus(config=self.config, encoder=self.encoder)
         # Save artist tokens
         self.corpus.dump_artists_tokens(checkpoint_dir / "artists_tokens.txt")
 
@@ -47,19 +44,21 @@ class Trainer:
         )
         vocab_size = self.encoder.vocab_size
         self.model = TransformerModel(
-            vocab_size=vocab_size, 
+            vocab_size=vocab_size,
             artists_size=len(self.corpus.artists_tokens),
-            **self.config.model.model_dump()
+            **self.config.model.model_dump(),
         ).to(device=self.device)
 
         ## Loss Function and Optimizer
         self.loss_fn = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(self.model.parameters(), lr=config.training.lr)
-        self.scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, self.config.scheduler.gamma)
+        self.scheduler = optim.lr_scheduler.ExponentialLR(
+            self.optimizer, self.config.scheduler.gamma
+        )
         self.perplexity = Perplexity(device=self.device)
 
         ## Checkpoint Callback
-        self.checkpoint = Checkpoint(self.config,run.name)
+        self.checkpoint = Checkpoint(self.config, run.name)
 
     def set_seed(self, seed: int) -> None:
         random.seed(seed)
@@ -82,7 +81,6 @@ class Trainer:
             logger.info(f"{k}:{v}")
         wandb.log(message)
 
-
     def generate(self) -> str:
         # Encode the seed text
         sample_input = self.encoder.encode_data(self.config.evaluation.sample_text)
@@ -100,20 +98,20 @@ class Trainer:
     @torch.no_grad()
     def evaluate(self) -> None:
         self.model.eval()
-        
-        val_loss = 0.
+
+        val_loss = 0.0
 
         for _ in range(self.config.training.num_validation_steps):
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
                 block_size=self.config.corpus.context_length,
-                split="val"
+                split="val",
             )
 
             inputs, targets, artists = (
                 inputs.long().to(self.device),
                 targets.long().to(self.device),
-                artists.long().to(self.device)
+                artists.long().to(self.device),
             )
 
             output = self.model(inputs, artists)
@@ -125,7 +123,7 @@ class Trainer:
             self.perplexity.update(output, targets)
 
         self.log({"val_loss": val_loss / self.config.training.num_validation_steps})
-        
+
         perplexity = self.perplexity.compute().item()
         self.log({"val_perplexity": perplexity})
         self.perplexity.reset()
@@ -151,13 +149,13 @@ class Trainer:
 
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
-                block_size=self.config.corpus.context_length
+                block_size=self.config.corpus.context_length,
             )
 
             inputs, targets, artists = (
                 inputs.long().to(self.device),
                 targets.long().to(self.device),
-                artists.long().to(self.device)
+                artists.long().to(self.device),
             )
 
             # Forward pass
@@ -182,7 +180,7 @@ class Trainer:
             self.optimizer.zero_grad()
 
             # Evaluation loop every evaluation_cycle steps
-            if step % self.config.training.evaluation_cycle == 0:    
+            if step % self.config.training.evaluation_cycle == 0:
                 self.evaluate()
                 self.scheduler.step()
                 self.log({"lr": self.scheduler.get_last_lr()[0]})
