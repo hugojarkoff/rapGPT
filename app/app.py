@@ -53,7 +53,7 @@ def predict(
 gradio_app = gr.Interface(
     predict,
     inputs=[
-        gr.Textbox(placeholder="ekip"),
+        gr.Textbox(value="ekip"),
         gr.Number(value=100),
         gr.Dropdown(
             value="freeze corleone", choices=artists_tokens.keys(), type="index"
