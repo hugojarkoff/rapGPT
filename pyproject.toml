@@ -24,7 +24,7 @@ data = [
     "kaggle>=1.6"
 ]
 app = [
-    "huggingface-hub[cli]>=0.24.7",
+    "huggingface-hub[cli,torch]>=0.24.7",
     "gradio>=4.44.1",
 ]
 

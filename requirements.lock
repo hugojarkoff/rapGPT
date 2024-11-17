@@ -109,6 +109,7 @@ numpy==1.26.4
     # via matplotlib
     # via pandas
     # via rapgpt
+    # via safetensors
 orjson==3.10.7
     # via gradio
 packaging==24.1
@@ -125,7 +126,7 @@ pillow==10.4.0
     # via matplotlib
 platformdirs==4.2.2
     # via wandb
-prompt-toolkit==3.0.47
+prompt-toolkit==3.0.48
     # via inquirerpy
 protobuf==4.25.3
     # via wandb
@@ -169,6 +170,8 @@ rich==13.8.1
 ruff==0.3.0
     # via gradio
     # via rapgpt
+safetensors==0.4.5
+    # via huggingface-hub
 semantic-version==2.10.0
     # via gradio
 sentry-sdk==2.2.0
@@ -202,7 +205,9 @@ tomli==2.0.1
 tomlkit==0.12.0
     # via gradio
 torch==2.2.2
+    # via huggingface-hub
     # via rapgpt
+    # via safetensors
 torcheval==0.0.7
     # via rapgpt
 tqdm==4.66.4
