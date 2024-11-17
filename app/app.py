@@ -8,6 +8,8 @@ from rapgpt.model import HFHubTransformerModel, TransformerModel
 import gradio as gr
 from huggingface_hub import hf_hub_download
 
+HF_REPO = "hugojarkoff/rapgpt"
+
 
 def valid_file(filepath: str) -> str:
     """Custom argparse type to check if a file exists."""
@@ -46,7 +48,7 @@ if __name__ == "__main__":
         artists_tokens = args.artists_tokens
     else:
         artists_tokens = hf_hub_download(
-            repo_id="hugojarkoff/rapgpt",
+            repo_id=HF_REPO,
             filename="artists_tokens.txt",
             repo_type="model",
         )
@@ -60,7 +62,7 @@ if __name__ == "__main__":
         artists_tokens = args.config_file
     else:
         config_file = hf_hub_download(
-            repo_id="hugojarkoff/rapgpt", filename="config.toml", repo_type="model"
+            repo_id=HF_REPO, filename="config.toml", repo_type="model"
         )
 
     config = Config.load_from_toml(config_file)
@@ -69,7 +71,7 @@ if __name__ == "__main__":
     if args.local_checkpoint:
         model = TransformerModel.load_state_dict(args.local_checkpoint)
     else:
-        model = HFHubTransformerModel.from_pretrained("hugojarkoff/rapgpt")
+        model = HFHubTransformerModel.from_pretrained(HF_REPO)
 
     def predict(
         lyrics_prompt: str,
@@ -94,14 +96,29 @@ if __name__ == "__main__":
     gradio_app = gr.Interface(
         predict,
         inputs=[
-            gr.Textbox(value="ekip"),
-            gr.Number(value=100),
-            gr.Dropdown(
-                value="freeze corleone", choices=artists_tokens.keys(), type="index"
+            gr.Textbox(
+                value="ekip",
+                label="Lyrics prompt",
+                info="rapGPT will continue this prompt",
             ),
-            gr.Number(value=42),
+            gr.Number(
+                value=100,
+                maximum=100,
+                label="New tokens to generate",
+                info="Number of new tokens to generate (limited to 100)",
+            ),
+            gr.Dropdown(
+                value="freeze corleone",
+                choices=artists_tokens.keys(),
+                type="index",
+                label="Artist",
+                info="Which artist style to generate",
+            ),
+            gr.Number(
+                value=42, label="Random seed", info="Change for different results"
+            ),
         ],
-        outputs=[gr.TextArea()],
+        outputs=[gr.TextArea(label="Generated Lyrics")],
         title="rapGPT",
     )
 
