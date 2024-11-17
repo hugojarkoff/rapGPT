@@ -39,8 +39,14 @@ This project uses [Gradio](https://www.gradio.app/) for local and online inferen
 Local inference is done using `python app/app.py` script. Some additional arguments can be passed, essentially indicating wether to use the [default checkpoint on HF Hub](https://huggingface.co/hugojarkoff/rapGPT/tree/main) or some local checkpoint.
 
 ## 5. Online Inference
-Online inference is served [on HF](https://huggingface.co/spaces/hugojarkoff/rapGPT) through the (more or less) the same Gradio `app`. It automatically calls the [default checkpoint on HF Hub](https://huggingface.co/hugojarkoff/rapGPT/tree/main) for inference.
+Online inference is served [on HF](https://huggingface.co/spaces/hugojarkoff/rapGPT) through the (more or less) same Gradio `app`. It automatically calls the [default checkpoint on HF Hub](https://huggingface.co/hugojarkoff/rapGPT/tree/main) for inference.
 
+## Future Works / Ideas
+
+Contribs welcome!
+
+- Retrain a bigger model for even better / more style-accurate lyrics
+- Find a way to select multiple artists tokens (for mixing styles)
 
 ## Credits
 
