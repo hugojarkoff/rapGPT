@@ -1,42 +1,75 @@
+import os
 import argparse
 import random
 import torch
 from rapgpt.config import Config
 from rapgpt.encoder import Encoder
-from rapgpt.model import HFHubTransformerModel
+from rapgpt.model import HFHubTransformerModel, TransformerModel
 import gradio as gr
+from huggingface_hub import hf_hub_download
+
+
+def valid_file(filepath: str) -> str:
+    """Custom argparse type to check if a file exists."""
+    if not os.path.isfile(filepath):
+        raise argparse.ArgumentTypeError(
+            f"'{filepath}' is not a valid file path or does not exist."
+        )
+    return filepath
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Convert and push locally trained and saved model to HF Hub"
-    )
+    parser = argparse.ArgumentParser(description="Run local inference using Gradio app")
 
     parser.add_argument(
         "--config-file",
-        default="configs/config.toml",
-        help="Path to config file used for training.",
+        type=valid_file,
+        default=None,
+        help="Path to config file used for training (optional). If not specified, will use the file from HF hugojarkoff/rapgpt",
     )
     parser.add_argument(
         "--artists-tokens",
-        default="checkpoints/fiery-spaceship-65/artists_tokens.txt",
-        help="Path to artists/tokens hashmap file generated in training.",
+        type=valid_file,
+        default=None,
+        help="Path to artists/tokens hashmap file generated in training (optional). If not specified, will use the file from HF hugojarkoff/rapgpt",
     )
     parser.add_argument(
-        "--checkpoint",
-        default="checkpoints/fiery-spaceship-65/model.pt",
-        help="Path to disk checkpoint of model.",
+        "--local-checkpoint",
+        type=valid_file,
+        default=None,
+        help="Path to the local checkpoint for inference (optional). If not specified, will use the file from hugojarkoff/rapgpt",
     )
 
     args = parser.parse_args()
 
-    with open(args.artists_tokens, "r") as f:
+    if args.artists_tokens:
+        artists_tokens = args.artists_tokens
+    else:
+        artists_tokens = hf_hub_download(
+            repo_id="hugojarkoff/rapgpt",
+            filename="artists_tokens.txt",
+            repo_type="model",
+        )
+
+    with open(artists_tokens, "r") as f:
         artists_tokens = {
             line.split(":")[0]: int(line.split(":")[1].rstrip("\n")) for line in f
         }
 
-    config = Config.load_from_toml(args.config_file)
+    if args.config_file:
+        artists_tokens = args.config_file
+    else:
+        config_file = hf_hub_download(
+            repo_id="hugojarkoff/rapgpt", filename="config.toml", repo_type="model"
+        )
+
+    config = Config.load_from_toml(config_file)
     encoder = Encoder(config=config)
-    model = HFHubTransformerModel.from_pretrained("hugojarkoff/rapgpt")
+
+    if args.local_checkpoint:
+        model = TransformerModel.load_state_dict(args.local_checkpoint)
+    else:
+        model = HFHubTransformerModel.from_pretrained("hugojarkoff/rapgpt")
 
     def predict(
         lyrics_prompt: str,
