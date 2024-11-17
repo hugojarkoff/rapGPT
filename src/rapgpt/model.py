@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from huggingface_hub import PyTorchModelHubMixin
 
 
 class Head(nn.Module):
@@ -202,3 +203,10 @@ class TransformerModel(nn.Module):
             # append sampled index to the running sequence
             x = torch.cat((x, x_next), dim=1)  # (B, T+1)
         return x
+
+
+class HFHubTransformerModel(TransformerModel, PyTorchModelHubMixin):
+    """Wraps a previously trained (and locally saved) model using rapGPT lib to upload to HF Hub"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
