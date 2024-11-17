@@ -5,7 +5,9 @@ from rapgpt.encoder import Encoder
 import argparse
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Convert and push locally trained and saved model to HF Hub")
+    parser = argparse.ArgumentParser(
+        description="Convert and push locally trained and saved model to HF Hub"
+    )
 
     parser.add_argument(
         "--config-file",
@@ -22,7 +24,7 @@ if __name__ == "__main__":
         default="checkpoints/fiery-spaceship-65/model.pt",
         help="Path to disk checkpoint of model.",
     )
-    
+
     args = parser.parse_args()
 
     with open(args.artists_tokens, "r") as f:
