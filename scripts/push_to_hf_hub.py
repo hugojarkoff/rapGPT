@@ -54,8 +54,7 @@ if __name__ == "__main__":
     encoder = Encoder(config=config)
 
     model = HFHubTransformerModel(
-        vocab_size=encoder.vocab_size
-        + 1,  # NOTE: Weird bug when loading checkpoint (vocab_size=50257), TODO: Fix
+        vocab_size=encoder.vocab_size,
         artists_size=len(artists_tokens),
         **config.model.model_dump(),
     )
