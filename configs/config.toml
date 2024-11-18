@@ -9,18 +9,18 @@ split_train_val = 0.85
 
 [model]
 context_length = 256
-num_heads = 15
-num_layers = 20
-hidden_dim = 512
+num_heads = 8
+num_layers = 18
+hidden_dim = 424
 
 [training]
 num_training_steps = 20000
 seed = 42
 lr = 1e-3
-batch_size = 54
+batch_size = 64
 
 [scheduler]
-gamma = 0.95
+gamma = 0.925
 
 [evaluation]
 sample_text = "Les vrais savent que "
