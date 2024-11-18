@@ -104,7 +104,7 @@ class Trainer:
         for _ in range(self.config.training.num_validation_steps):
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
-                block_size=self.config.corpus.context_length,
+                block_size=self.config.model.context_length,
                 split="val",
             )
 
@@ -149,7 +149,7 @@ class Trainer:
 
             inputs, targets, artists = self.corpus.get_random_batch(
                 batch_size=self.config.training.batch_size,
-                block_size=self.config.corpus.context_length,
+                block_size=self.config.model.context_length,
             )
 
             inputs, targets, artists = (
