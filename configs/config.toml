@@ -5,17 +5,22 @@ path = "data/french_rap_lyrics"
 
 [corpus]
 encoding = "r50k_base"
+split_train_val = 0.85
 
 [model]
-context_length = 1024
-num_heads = 6
-num_layers = 15
+context_length = 256
+num_heads = 15
+num_layers = 20
 hidden_dim = 512
 
 [training]
+num_training_steps = 20000
 seed = 42
 lr = 1e-3
-batch_size = 18
+batch_size = 54
+
+[scheduler]
+gamma = 0.95
 
 [evaluation]
 sample_text = "Les vrais savent que "
@@ -23,4 +28,6 @@ new_tokens = 50
 artist_token = 1
 
 [wandb]    
-mode = "disabled"  # offline or online or disabled
+mode = "online"  # offline or online or disabled
+group = "fullrun"
+tags = []
