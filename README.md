@@ -2,7 +2,7 @@
 
 Train a GPT-like model to generate French rap lyrics.
 
-Mostly a fun and educational personal project, learning how to design and train a GPT-like architecture from scratch.
+Essentially a fun and educational personal project, learning how to design and train a GPT-like architecture from scratch.
 
 ## 0. Dependencies management
 This project uses [Rye](https://rye-up.com/). Make sure it's installed in your system.
@@ -43,10 +43,12 @@ Online inference is served [on HF](https://huggingface.co/spaces/hugojarkoff/rap
 
 ## Future Works / Ideas
 
-Contribs welcome!
+Since this project is mostly personal / educational (and since I'm GPU poor), it is probably not production-ready in its current state (and has no intention of being in the planned future). However, here are some interesting leads I plan on exploring:
 
-- Retrain a bigger model for even better / more style-accurate lyrics
-- Find a way to select multiple artists tokens (for mixing styles)
+- I noticed the style of each rapper isn't sufficiently marked. To enforce this more in model training, I want to try adding a classification head and backpropagate using logits + classification losses;
+- Clean-up code / use more production-ready modules (e.g [FlashAttention](https://github.com/Dao-AILab/flash-attention))
+- Train in fp16
+- Find a way to select multiple artists tokens (for mixing styles, could be fun)
 
 ## Credits
 
